@@ -31,6 +31,10 @@ dns_ip="149.91.80.153"
 open_dns=true
 open_nic=false
 
+ip_lan=$(ip route get 1 | awk '{print $NF;exit}')
+ip_wan=$(curl 4.icanhazip.com)
+fqdn=$(curl icanhazptr.com)
+
 ### Functions ###
 
 loading() {
@@ -107,6 +111,15 @@ fi
 
 chattr +ai /etc/resolv.conf
 
+logo
+read -rp "Hostname : " hostname
+
+echo "127.0.0.1         $fqdn $hostname localhost" > /etc/hosts
+echo "$ip_lan           $fqdn $hostname localhost" >> /etc/hosts
+echo "$ip_wan           $fqdn $hostname localhost" >> /etc/hosts
+
+hostnamectl set-hostname $hostname
+
 echo 'deb http://ftp.fr.debian.org/debian/ stable main contrib non-free
 deb http://ftp.fr.debian.org/debian/ stable-updates main contrib non-free
 
@@ -140,7 +153,7 @@ done
 logo
 apt update
 apt full-upgrade -y
-apt install mlocate dialog -y 
+apt install curl mlocate dialog -y 
 
 if [[ "$certbot" = "y" ]] || [[ "$certbot" = "Y" ]]; then
 
@@ -184,12 +197,36 @@ while true; do
     if [[ "$zsh" = "y" ]] || [[ "$zsh" = "Y" ]]; then
 
         echo ''
-        apt install git curl zsh -y
+        apt install git zsh -y
         sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
         break
 
     elif [[ "$zsh" = "n" ]] || [[ "$zsh" = "N" ]]; then
         
+        break
+
+    else
+
+        logo
+        echo -e "${red}Please enter y/Y or n/N.${normal}"
+        sleep 3
+
+    fi
+
+done
+
+while true; do
+    
+    logo
+    read -rp "Reboot the VPS ? y/N : " reboot
+
+    if [[ "$reboot" = "y" ]] || [[ "$reboot" = "Y" ]]; then
+
+        reboot
+
+    elif [[ "$reboot" = "n" ]] || [[ "$reboot" = "N" ]]; then
+        
+        echo ""
         break
 
     else
