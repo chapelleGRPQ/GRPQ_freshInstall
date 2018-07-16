@@ -27,6 +27,10 @@ fi
 
 php_version="7.0"
 
+dns_ip="149.91.80.153"
+open_dns=true
+open_nic=false
+
 ### Functions ###
 
 loading() {
@@ -83,6 +87,26 @@ if [[ $EUID -ne 0 ]]; then
     
 fi
 
+chattr -ai /etc/resolv.conf
+rm -rf /etc/resolv.conf
+echo "nameserver $dns_ip" > /etc/resolv.conf
+
+if [[ "$open_dns" = true ]]; then
+
+	bash -c 'echo "nameserver 208.67.220.220
+nameserver 208.67.222.222" >> /etc/resolv.conf'
+
+fi
+
+if [[ "$open_nic" = true ]]; then
+
+	bash -c 'echo "nameserver 87.98.175.85
+nameserver 51.255.48.78" >> /etc/resolv.conf'
+
+fi
+
+chattr +ai /etc/resolv.conf
+
 echo 'deb http://ftp.fr.debian.org/debian/ stable main contrib non-free
 deb http://ftp.fr.debian.org/debian/ stable-updates main contrib non-free
 
@@ -116,7 +140,7 @@ done
 logo
 apt update
 apt full-upgrade -y
-apt install curl git zsh -y
+apt install mlocate dialog -y 
 
 if [[ "$certbot" = "y" ]] || [[ "$certbot" = "Y" ]]; then
 
@@ -146,6 +170,32 @@ while true; do
 
 		logo
 		echo -e "${red}Please enter y/Y or n/N.${normal}"
+        sleep 3
+
+    fi
+
+done
+
+while true; do
+    
+    logo
+    read -rp "Install Oh my ZSH ? y/N : " zsh
+
+    if [[ "$zsh" = "y" ]] || [[ "$zsh" = "Y" ]]; then
+
+        echo ''
+        apt install git curl zsh -y
+        sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+        break
+
+    elif [[ "$zsh" = "n" ]] || [[ "$zsh" = "N" ]]; then
+        
+        break
+
+    else
+
+        logo
+        echo -e "${red}Please enter y/Y or n/N.${normal}"
         sleep 3
 
     fi
