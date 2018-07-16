@@ -116,7 +116,7 @@ done
 logo
 apt update
 apt full-upgrade -y
-apt install curl git zsh -y
+apt install mlocate dialog -y 
 
 if [[ "$certbot" = "y" ]] || [[ "$certbot" = "Y" ]]; then
 
@@ -146,6 +146,32 @@ while true; do
 
 		logo
 		echo -e "${red}Please enter y/Y or n/N.${normal}"
+        sleep 3
+
+    fi
+
+done
+
+while true; do
+    
+    logo
+    read -rp "Install Oh my ZSH ? y/N : " zsh
+
+    if [[ "$zsh" = "y" ]] || [[ "$zsh" = "Y" ]]; then
+
+        echo ''
+        apt install git curl zsh -y
+        sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+        break
+
+    elif [[ "$zsh" = "n" ]] || [[ "$zsh" = "N" ]]; then
+        
+        break
+
+    else
+
+        logo
+        echo -e "${red}Please enter y/Y or n/N.${normal}"
         sleep 3
 
     fi
